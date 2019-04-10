@@ -1,7 +1,7 @@
 let token;
 let consoleLog;
 if (process.env.TOKEN) token = process.env.TOKEN;
-else token =  token = require('./config.json').discordToken;
+else token = require('./config.json').discordToken;
 
 if (process.env.CONSOLE_LOG) consoleLog = process.env.CONSOLE_LOG;
 else consoleLog = 1;

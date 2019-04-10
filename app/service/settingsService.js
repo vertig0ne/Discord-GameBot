@@ -12,8 +12,8 @@ module.exports = class settingsService {
 
     create(key) {
         const p = {
-            "prefix": "!",
-        }
+            'prefix': '!',
+        };
         this.set(key, p);
         return this.get(key);
     }
@@ -29,4 +29,4 @@ module.exports = class settingsService {
     delete(key) {
         return this.provider.delete(key);
     }
-}
+};
