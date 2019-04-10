@@ -10,6 +10,7 @@ RUN /sbin/apk add --no-cache openssl-dev \
     nodejs-npm \
     nodejs-current \
     openssl \
+    python \
     ca-certificates \
     && npm install
 
