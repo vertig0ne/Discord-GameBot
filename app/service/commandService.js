@@ -1,3 +1,4 @@
+const Discord = require('discord.js');
 module.exports = class commandService {
     constructor(message, command, args = null) {
         this._message = message;
@@ -23,7 +24,14 @@ module.exports = class commandService {
             return ret;
         }
         catch (err) {
-            return this.reply(`ERR: ${err.name}: ${err.message}`);
+            const embed = new Discord.RichEmbed();
+            embed.setTitle(`Error${(err.name == Error) ? `: ${err.name}` : ''}`);
+            embed.setColor(16711680);
+            embed.setAuthor(`GameBot`, 'https://github.com/vertig0ne/Discord-GameBot/blob/master/app.png?raw=true');
+            embed.setDescription(`${err.message}`);
+            embed.setFooter(`Called by ${this.message.author.username}`, this.message.author.avatarURL);
+            embed.setTimestamp();
+            return this.reply({ embed });
         }
     }
 
