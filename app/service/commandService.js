@@ -101,6 +101,10 @@ module.exports = class commandService {
         return this._client;
     }
 
+    get channel() {
+        return this._message.channel;
+    }
+
     get author() {
         return this._message.author;
     }
