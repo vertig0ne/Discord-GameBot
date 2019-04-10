@@ -1,5 +1,5 @@
 // Shout out to HalianElf#6003
-
+const Discord = require('discord.js');
 const command = require('./base');
 module.exports = class minesweeperCommand extends command {
     constructor(client) {
@@ -12,6 +12,18 @@ module.exports = class minesweeperCommand extends command {
 
     async hasPermission(message) {
         return true;
+    }
+
+    async help(message) {
+        const embed = new Discord.RichEmbed();
+        embed.setTitle('Minesweeper');
+        embed.setColor(3568138);
+        embed.setAuthor(`GameBot`, 'https://github.com/vertig0ne/Discord-GameBot/blob/master/app.png?raw=true');
+        embed.setDescription(`Plays a game of Minesweeper!\n\nUses Discord spoiler tag\n\n**Available Difficulties** easy/medium/hard/xhard\n\n**Default** medium`);
+        embed.addField('Usage', `${message.guild.settings.prefix}${this.info.name} *difficulty*`);
+        embed.setFooter(`Called by ${message.author.username}`, message.author.avatarURL);
+        embed.setTimestamp();
+        await message.reply({ embed });
     }
 
     async run(message, args) {

@@ -10,6 +10,18 @@ module.exports = class helpCommand extends command {
         super(client, info);
     }
 
+    async help(message) {
+        const embed = new Discord.RichEmbed();
+        embed.setTitle('Available commands');
+        embed.setColor(3568138);
+        embed.setAuthor(`GameBot`, 'https://github.com/vertig0ne/Discord-GameBot/blob/master/app.png?raw=true');
+        embed.setDescription(`${this.client.commandRepository.getCommands().join('\n')}`);
+        embed.addField('Usage', `${message.guild.settings.prefix}${this.info.name} *command*`);
+        embed.setFooter(`Called by ${message.author.username}`, message.author.avatarURL);
+        embed.setTimestamp();
+        await message.reply({ embed });
+    }
+
     async run(message, args) {
         if (!args) {
             const embed = new Discord.RichEmbed();
@@ -19,6 +31,7 @@ module.exports = class helpCommand extends command {
             embed.setDescription(`${this.client.commandRepository.getCommands().join('\n')}`);
             embed.addField('Usage', `${message.guild.settings.prefix}${this.info.name} *command*`);
             embed.setFooter(`Called by ${message.author.username}`, message.author.avatarURL);
+            embed.setTimestamp();
             await message.reply({ embed });
         } else {
             let cmd = await this.client.commandRepository.getCommand(args);
