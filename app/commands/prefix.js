@@ -11,7 +11,7 @@ module.exports = class prefixCommand extends command {
 
     run(message, args = []) {
         args = args.toString();
-        if (args == '') return message.channel.send('No Prefix found');
+        if (args == '') return message.reply('No Prefix found');
         message.guild.settings = this.client.settingsService.get(message.guild.id);
         message.guild.settings.prefix = args;
         this.client.settingsService.set(message.guild.id, message.guild.settings);
