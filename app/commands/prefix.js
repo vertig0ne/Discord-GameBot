@@ -10,6 +10,10 @@ module.exports = class prefixCommand extends command {
         super(client, info);
     }
 
+    async hasPermission(message) {
+        return message.member.hasPermission('ADMINISTRATOR');
+    }
+
     async help(message) {
         const embed = new Discord.RichEmbed();
         embed.setTitle('Prefix');
