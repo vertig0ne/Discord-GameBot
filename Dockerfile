@@ -5,7 +5,8 @@ ENV CONSOLE_LOG=1
 COPY ./ /app/
 WORKDIR /app
 
-RUN /sbin/apk add --no-cache openssl-dev \
+RUN /sbin/apk add --no-cache build-base \
+    openssl-dev \
     curl \
     nodejs-npm \
     nodejs-current \
