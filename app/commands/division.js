@@ -40,21 +40,6 @@ module.exports = class divisionCommand extends command {
         this.platformEmojis.push(client.emojis.get("565323810388049926")); // uplay
     }
 
-    _parse(args) {
-        const r = { platform: false, username: false }
-        let query = false;
-        args.split(',').forEach(arg => {
-            if (arg.startsWith('platform:')) {
-                r.platform = arg.split(':')[1];
-                query = args.replace(`${arg},`, '');
-            }
-        });
-        if (!query) r.username = replaceAll(args, ',', ' ');
-        else r.username = replaceAll(query, ',', ' ');
-        if (r.username == `platform:${r.platform}`) r.username = false;
-        return r;
-    }
-
     async help(message) {
         const embed = new Discord.RichEmbed();
         embed.setTitle(`Division Command Help`);
@@ -86,23 +71,57 @@ module.exports = class divisionCommand extends command {
                             collectors[i].stop();
                         }
 
-                        const a = await this.getPlayerData(args.username, this.platform[i]);
-                        if (!a.results || !a.results[0]) throw new Error('Search yeilded no results');
-                        const pid = a.results[0].pid;
-                        const b = await this.getPlayer(pid);
-                        const embed = this.embedMe(b);
+                        const embed = await this._run(args.username, this.platform[i]);
                         await reply.edit({ embed });
-                    } catch (err) {  }
+
+                        reply.reactions.forEach((r) => { r.remove(); });
+                        reaction.remove();
+                    } catch (err) {
+                        const embed = this._err(err);
+                        await reply.edit({ embed });
+                    }
                 });
             }
         } else {
-            const a = await this.getPlayerData(args.username, args.platform);
-            if (!a.results || !a.results[0]) throw new Error('Search yeilded no results');
-            const pid = a.results[0].pid;
-            const b = await this.getPlayer(pid);
-            const embed = this.embedMe(b);
+            const embed = await this._run(args.username, this.platform[i]);
             await message.reply({ embed });
         }
+    }
+
+    async _run(username, platform) {
+        try {
+            const player = await this.getPlayer(username, platform);
+            const pid = player.pid;
+            const stats = await this.getPlayerStats(pid);
+            const embed = this.statsEmbed({ player, stats });
+            return embed;
+        } catch (err) { throw err; }
+    }
+
+    _parse(args) {
+        const r = { platform: false, username: false }
+        let query = false;
+        args.split(',').forEach(arg => {
+            if (arg.startsWith('platform:')) {
+                r.platform = arg.split(':')[1];
+                query = args.replace(`${arg},`, '');
+            }
+        });
+        if (!query) r.username = replaceAll(args, ',', ' ');
+        else r.username = replaceAll(query, ',', ' ');
+        if (r.username == `platform:${r.platform}`) r.username = false;
+        return r;
+    }
+
+    _err(err) {
+        const embed = new Discord.RichEmbed();
+        embed.setTitle('Error');
+        embed.setColor(16711680);
+        embed.setAuthor(`GameBot`, 'https://github.com/vertig0ne/Discord-GameBot/blob/master/app.png?raw=true');
+        embed.setDescription(`${err.message}`);
+        embed.setFooter(`Called by ${this.message.author.username}`, this.message.author.avatarURL);
+        embed.setTimestamp();
+        return embed;
     }
 
     _platformEmbed() {
@@ -127,24 +146,25 @@ module.exports = class divisionCommand extends command {
         }
     }
 
-    async getPlayerData(name, patform) {
+    async getPlayer(name, patform) {
         try {
             const req = await axios({ method: 'GET', url: `https://thedivisiontab.com/api/search.php?name=${encodeURIComponent(name)}&platform=${patform}` });
-            return req.data;
-        } catch (err) { throw new Error('Unable to get player information') };
+            if (!req.data || !req.data.results || !req.data.results[0]) throw new Error('No User');
+            return req.data.results[0];
+        } catch (err) { throw new Error('Unable to find player') };
     }
 
-    async getPlayer(playerId) {
+    async getPlayerStats(playerId) {
         try {
             const req = await axios({ method: 'GET', url: `https://thedivisiontab.com/api/player.php?pid=${playerId}` });
             return req.data;
-        } catch (err) { throw new Error('Unable to get player information') };
+        } catch (err) { throw new Error('Unable to obtain player data') };
     }
 
-    embedMe(player) {
+    statsEmbed({ player, stats }) {
         const embed = new Discord.RichEmbed();
         embed.setTitle(`Stats for ${player.name}`);
-        embed.setDescription(`**Gear Score**: ${player.gearscore}\n**Level**: ${player.level_pve}\n**Last Mission**: ${player.lastmission}`);
+        embed.setDescription(`**Gear Score**: ${stats.gearscore}\n**Level**: ${stats.level_pve}\n**Last Mission**: ${stats.lastmission}`);
         embed.setTimestamp();
         embed.setColor(9851947);
         embed.setFooter(`Called by ${this.message.author.username}`, this.message.author.avatarURL);
@@ -152,9 +172,9 @@ module.exports = class divisionCommand extends command {
         embed.setImage(`https://m.media-amazon.com/images/S/aplus-media/vc/77d0ef34-a53b-4bcb-af13-d57094720c3d._CR0,0,970,300_PT0_SX970__.png`);
         embed.setAuthor('The Division 2', 'https://pbs.twimg.com/profile_images/1005914879817994241/3CgOVaS7_400x400.jpg', 'https://tomclancy-thedivision.ubisoft.com/');
 
-        embed.addField('Personal Stats', `**PvP Kills**: ${player.kills_pvp}\n**NPC Kills**: ${player.kills_npc}\n**Skill Kills**: ${player.kills_skill}\n**Headshots**: ${player.kills_headshot}\n**Items looted**: ${player.looted}\n**E-Credits**: ${player.ecredits}`);
-        embed.addField('DarkZone Stats', `**Level**: ${player.level_dz}\n**XP**: ${player.xp_dz}\n**Time Played**: ${shortEnglishHumanizer(player.timeplayed_dz * 1000)}\n**While Rogue**: ${shortEnglishHumanizer(player.timeplayed_rogue * 1000)}\n**Hyenas Killed**: ${player.kills_pve_dz_hyenas}\n**OutCasts Killed**: ${player.kills_pve_dz_outcasts}\n**TrueSons Killed**: ${player.kills_pve_dz_truesons}\n**BlackTusks Killed**: ${player.kills_pve_dz_blacktusk}`);
-        embed.addField('PvE Stats', `**XP**: ${player.xp_ow}\n**Time Played**: ${shortEnglishHumanizer(player.timeplayed_pve * 1000)}\n**Elite Kills**: ${player.kills_pvp_elitebosses}\n**Named Kills**: ${player.kills_pvp_namedbosses}\n**Hyena Kills**: ${player.kills_pve_hyenas}\n**OutCasts Kills**: ${player.kills_pve_outcasts}\n**TrueSons Kills**: ${player.kills_pve_truesons}\n**BlackTusk Kills**: ${player.kills_pve_blacktusk}`)
+        embed.addField('Personal Stats', `**PvP Kills**: ${stats.kills_pvp}\n**NPC Kills**: ${stats.kills_npc}\n**Skill Kills**: ${stats.kills_skill}\n**Headshots**: ${stats.kills_headshot}\n**Items looted**: ${stats.looted}\n**E-Credits**: ${stats.ecredits}`);
+        embed.addField('DarkZone Stats', `**Level**: ${stats.level_dz}\n**XP**: ${stats.xp_dz}\n**Time Played**: ${shortEnglishHumanizer(stats.timeplayed_dz * 1000)}\n**While Rogue**: ${shortEnglishHumanizer(stats.timeplayed_rogue * 1000)}\n**Hyenas Killed**: ${stats.kills_pve_dz_hyenas}\n**OutCasts Killed**: ${stats.kills_pve_dz_outcasts}\n**TrueSons Killed**: ${stats.kills_pve_dz_truesons}\n**BlackTusks Killed**: ${stats.kills_pve_dz_blacktusk}`);
+        embed.addField('PvE Stats', `**XP**: ${stats.xp_ow}\n**Time Played**: ${shortEnglishHumanizer(stats.timeplayed_pve * 1000)}\n**Elite Kills**: ${stats.kills_pvp_elitebosses}\n**Named Kills**: ${stats.kills_pvp_namedbosses}\n**Hyena Kills**: ${stats.kills_pve_hyenas}\n**OutCasts Kills**: ${stats.kills_pve_outcasts}\n**TrueSons Kills**: ${stats.kills_pve_truesons}\n**BlackTusk Kills**: ${stats.kills_pve_blacktusk}`)
         return embed;
     }
 }
