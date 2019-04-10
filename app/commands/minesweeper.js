@@ -9,11 +9,7 @@ module.exports = class minesweeperCommand extends command {
         }
         super(client, info);
     }
-
-    async hasPermission(message) {
-        return true;
-    }
-
+    
     async help(message) {
         const embed = new Discord.RichEmbed();
         embed.setTitle('Minesweeper');
