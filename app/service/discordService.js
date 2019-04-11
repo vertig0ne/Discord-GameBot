@@ -9,6 +9,7 @@ module.exports = class discordService extends Discord.Client {
     constructor(config = {}) {
         super(config);
         this.isDocker = false;
+        this.version = require('../../package.json').version;
         if (fs.existsSync('/config/')) {
             this.isDocker = true;
         }

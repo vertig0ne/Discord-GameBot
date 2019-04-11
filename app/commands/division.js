@@ -1,6 +1,6 @@
 const axios = require('axios');
 const Discord = require('discord.js');
-const humanizeDuration = require('humanize-duration')
+const humanizeDuration = require('humanize-duration');
 const command = require('./base');
 
 /*
