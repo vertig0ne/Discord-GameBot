@@ -5,7 +5,9 @@
   "main": "bot.js",
   "scripts": {
     "start": "cd app && node bot.js",
-    "test": "echo \"Error: no test to run yet\" && exit 0"
+    "test": "echo \"Error: no test to run yet\" && exit 0",
+    "snyk-protect": "snyk protect",
+    "prepare": "npm run snyk-protect"
   },
   "repository": {
     "type": "git",
@@ -30,7 +32,9 @@
     "ffmpeg-binaries": "^3.2.2",
     "humanize-duration": "^3.18.0",
     "node-opus": "^0.2.7",
-    "string-format": "^1.0.0"
+    "string-format": "^1.0.0",
+    "snyk": "^1.161.1"
   },
-  "devDependencies": {}
+  "devDependencies": {},
+  "snyk": true
 }
