@@ -21,7 +21,7 @@
     "url": "https://github.com/MediaButler/MediaButler/issues"
   },
   "dependencies": {
-    "axios": "^0.18.0",
+    "axios": "^0.18.1",
     "bufferutil": "^3.0.4",
     "discord.js": "^11.4.2",
     "enmap": "^2.1.1",
