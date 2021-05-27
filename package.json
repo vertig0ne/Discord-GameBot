@@ -23,7 +23,7 @@
   "dependencies": {
     "axios": "^0.18.1",
     "bufferutil": "^3.0.4",
-    "discord.js": "^11.4.2",
+    "discord.js": "^12.0.0",
     "enmap": "^2.1.1",
     "enmap-sqlite": "^2.0.5",
     "erlpack": "^0.1.2",
